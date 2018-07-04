@@ -1,7 +1,12 @@
-# OpenVPN CA scripts
+# OpenVPN CA makefile
 
-This repository provides some scripts that wrap cloudflare's cfssl tool to
+This repository provides a makefile that wraps cloudflare's cfssl tool to
 provide an alternative to openvpn's easy-rsa.
+
+It's a fork of <https://github.com/mivok/openvpn_cfssl>, which uses scripts
+for providing the same functionality. A makefile is used here out of
+convenience, to have a ready-to-copy single file to manage CAs in other
+repositories (e.g. ansible, puppet).
 
 ## Usage
 
