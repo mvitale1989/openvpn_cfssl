@@ -22,24 +22,20 @@ The full procedure to create certs for the CA and two client is as follows:
     make ca-certs
     
     # Create client certificates for `myclient1` and `myclient2`
-    CN=myclient1 make client-cert
-    CN=myclient2 make client-cert
+    CN=myclient make client-cert
 
 The above results in the creation of the following files:
 
     default_CA/ca-key.pem
     default_CA/ca.csr
     default_CA/ca.pem
-    default_CA/myclient1-key.pem
-    default_CA/myclient1.csr
-    default_CA/myclient1.pem
-    default_CA/myclient2-key.pem
-    default_CA/myclient2.csr
-    default_CA/myclient2.pem
-    default_CA/ta.key
+    default_CA/clients/myclient-key.pem
+    default_CA/clients/myclient.csr
+    default_CA/clients/myclient.pem
     default_CA/server-key.pem
     default_CA/server.csr
     default_CA/server.pem
+    default_CA/ta.key
 
 
 The default values work well, but note that if required, you can optionally
@@ -51,7 +47,8 @@ the repository you're using the makefile into.
 `default_CA`. The makefile is also able to read this from the shell env, so you
 can specify it either at makefile invocation time
 (e.g. `CA_DIR=./myCAdir make ca-certs`) or by exporting the variable before of
-the makefile usage (e.g. `export CA_DIR=./myCAdir; make ca-certs`).
+the makefile usage (e.g. `export CA_DIR=./myCAdir; make ca-certs`). Setting it
+to `.` lets you have the Makefile inside of the CA dir itself.
 
 
 ## OpenVPN configuration
@@ -75,7 +72,11 @@ the required CA and client certificates in OpenVPN's configuration directory:
     key clientname-key.pem
     tls-auth ta.key 1
 
-Note: for both configuration, you might instead prefer to inline the
+A couple of remarks:
+- For both configuration, you might instead prefer to inline the
 certificates in your OpenVPN's config file, instead of copying them separately.
 See <https://community.openvpn.net/openvpn/wiki/IOSinline> for an example of
 how to do this.
+- For non-automated clients, you might want to encrypt your private key with a
+passphrase, before inclusion in your client config. You can do so with the
+command: `openssl rsa -aes256 -in myclient-key.pem -out myclient-seckey.pem`

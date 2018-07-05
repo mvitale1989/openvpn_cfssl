@@ -16,6 +16,7 @@ export CN
 
 RENDERED_CA  := <(echo "$$TPL_CA")
 RENDERED_CSR := <(echo "$$TPL_CSR" | CN="$${CN}" envsubst '$${CN}')
+CLIENTS_DIR   := $(CA_DIR)/clients
 .PHONY: help ca-certs client-cert
 
 help:
@@ -38,16 +39,18 @@ ca-certs: common
 	openvpn --genkey --secret $(CA_DIR)/ta.key
 
 client-cert: common checkenv-CN
-	@[ ! -f "$(CA_DIR)/$${CN}.pem" ] || { \
+	@echo "# Creating directory for clients: $(CLIENTS_DIR)"
+	mkdir -p $(CLIENTS_DIR)
+	@[ ! -f "$(CLIENTS_DIR)/$${CN}.pem" ] || { \
 		echo "ERROR: certificate already exists for client $${CN}. Aborting"; \
-		echo "Certificate path: $(CA_DIR)/$${CN}.pem"; \
+		echo "Certificate path: $(CLIENTS_DIR)/$${CN}.pem"; \
 		exit 3; \
 		}
 	@echo "# Making client certificate"
 	cfssl gencert -ca $(CA_DIR)/ca.pem -ca-key $(CA_DIR)/ca-key.pem \
     -config=$(RENDERED_CA) -profile="client" -hostname="$${CN}" \
     $(RENDERED_CSR) \
-		| cfssljson -bare "$(CA_DIR)/$${CN}"
+		| cfssljson -bare "$(CLIENTS_DIR)/$${CN}"
 
 
 
