@@ -7,7 +7,7 @@ export TPL_CSR
 
 ### Parameters for certificate generation, to be passed during the make invocation
 
-export CA_DIR ?= CAs/default
+export CA_DIR ?= default_CA
 export CN
 
 
@@ -16,7 +16,7 @@ export CN
 
 RENDERED_CA  := <(echo "$$TPL_CA")
 RENDERED_CSR := <(echo "$$TPL_CSR" | CN="$${CN}" envsubst '$${CN}')
-.PHONY: help ca-certs client-certs print
+.PHONY: help ca-certs client-cert
 
 help:
 	@echo "$$USAGE_TEXT"
@@ -24,7 +24,7 @@ help:
 ca-certs: common
 	@echo "# Creating directory for CA: $(CA_DIR)"
 	mkdir -p $(CA_DIR)
-	@echo "# Generating CA keys and certificates"
+	@echo "# Making CA certificate"
 	CN=CA && \
 		cfssl genkey --initca $(RENDERED_CSR) \
 		| cfssljson -bare $(CA_DIR)/ca
@@ -34,8 +34,8 @@ ca-certs: common
 		-ca-key $(CA_DIR)/ca-key.pem -config=$(RENDERED_CA) \
 		-profile="server" -hostname="server" $(RENDERED_CSR) \
 		| cfssljson -bare $(CA_DIR)/server
-	@echo "# Generate shared secret..."
-	openvpn --genkey --secret $(CA_DIR)/psk.key
+	@echo "# Making OpenVPN PSK"
+	openvpn --genkey --secret $(CA_DIR)/ta.key
 
 client-cert: common checkenv-CN
 	@[ ! -f "$(CA_DIR)/$${CN}.pem" ] || { \
@@ -80,11 +80,13 @@ define USAGE_TEXT
 Makefile to manage one or more OpenVPN CAs.
 
 Available commands:
-- make ca-certs
-- CN=myClient make client-certs
+- 'make ca-certs': generate the CA and server certificate, and an OpenVPN PSK
+- 'CN=myClient make client-certs': generate a client certificate for myClient
 
 You can control the CA directory location with the CA_DIR variable. E.g.:
-- CA_DIR=my/cadir make ca-certs
+- 'CA_DIR=myCAdir make ca-certs'
+
+Default CA_DIR is 'default_CA'
 endef
 
 
