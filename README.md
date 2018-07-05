@@ -26,30 +26,25 @@ The full procedure to create certs for the CA and two client is as follows:
 
 The above results in the creation of the following files:
 
-    default_CA/ca-key.pem
-    default_CA/ca.csr
-    default_CA/ca.pem
-    default_CA/clients/myclient-key.pem
-    default_CA/clients/myclient.csr
-    default_CA/clients/myclient.pem
-    default_CA/server-key.pem
-    default_CA/server.csr
-    default_CA/server.pem
-    default_CA/ta.key
+    ./ca-key.pem
+    ./ca.csr
+    ./ca.pem
+    ./clients/myclient-key.pem
+    ./clients/myclient.csr
+    ./clients/myclient.pem
+    ./server-key.pem
+    ./server.csr
+    ./server.pem
+    ./ta.key
 
 
 The default values work well, but note that if required, you can optionally
 tune a few parameters in the makefile before usage:
-- Variables `TPL_CA` and `TPL_CSR`: the skeleton of the cfssl JSONs used for
-cert generation. E.g. you can modify the country and organization, according to
-the repository you're using the makefile into.
-- Variable `CA_DIR`: the destination CA directory, which by default is
-`default_CA`. The makefile is also able to read this from the shell env, so you
-can specify it either at makefile invocation time
-(e.g. `CA_DIR=./myCAdir make ca-certs`) or by exporting the variable before of
-the makefile usage (e.g. `export CA_DIR=./myCAdir; make ca-certs`). Setting it
-to `.` lets you have the Makefile inside of the CA dir itself.
-
+- Makefile variables `TPL_CA` and `TPL_CSR`: the skeleton of the cfssl JSONs
+used for cert generation. E.g. you can modify the country and organization,
+according to the repository you're using the makefile into.
+- Environment variable `CA_DIR`: the destination CA directory, which by default
+is the current directory.
 
 ## OpenVPN configuration
 

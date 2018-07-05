@@ -4,19 +4,18 @@ export TPL_CA
 export TPL_CSR
 
 
-
 ### Parameters for certificate generation, to be passed during the make invocation
 
-export CA_DIR ?= default_CA
+export CA_DIR ?= .
 export CN
-
 
 
 ### Makefile functions
 
+RELEASE      := 0.1.0
 RENDERED_CA  := <(echo "$$TPL_CA")
 RENDERED_CSR := <(echo "$$TPL_CSR" | CN="$${CN}" envsubst '$${CN}')
-CLIENTS_DIR   := $(CA_DIR)/clients
+CLIENTS_DIR  := $(CA_DIR)/clients
 .PHONY: help ca-certs client-cert
 
 help:
@@ -54,6 +53,8 @@ client-cert: common checkenv-CN
 
 
 
+
+
 ### Utility Makefile functions and definitions
 
 SHELL         := /bin/bash
@@ -80,17 +81,21 @@ checkcmd-%:
 
 export USAGE_TEXT
 define USAGE_TEXT
+mvitale1989/openvpn_cfssl
+Version: $(RELEASE)
+Website: https://github.com/mvitale1989/openvpn_cfssl
+
 Makefile to manage one or more OpenVPN CAs.
-
 Available commands:
-- 'make ca-certs': generate the CA and server certificate, and an OpenVPN PSK
-- 'CN=myClient make client-certs': generate a client certificate for myClient
+- 'make ca-certs': generate the CA and server certificate, and an OpenVPN PSK.
+- 'CN=myClient make client-cert': generate a client certificate for myClient.
 
-You can control the CA directory location with the CA_DIR variable. E.g.:
-- 'CA_DIR=myCAdir make ca-certs'
-
-Default CA_DIR is 'default_CA'
+Available env var parameters:
+- 'CA_DIR=my/CA/dir make ca-certs': change the directory where certificates are
+  written to and read from. Default value is current directory.
 endef
+
+
 
 
 
