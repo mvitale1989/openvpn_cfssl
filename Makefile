@@ -12,7 +12,7 @@ export CN
 
 ### Makefile functions
 
-RELEASE      := 0.1.0
+RELEASE      := 0.1.1
 RENDERED_CA  := <(echo "$$TPL_CA")
 RENDERED_CSR := <(echo "$$TPL_CSR" | CN="$${CN}" envsubst '$${CN}')
 CLIENTS_DIR  := $(CA_DIR)/clients
@@ -50,6 +50,24 @@ client-cert: common checkenv-CN
     -config=$(RENDERED_CA) -profile="client" -hostname="$${CN}" \
     $(RENDERED_CSR) \
 		| cfssljson -bare "$(CLIENTS_DIR)/$${CN}"
+
+config-embeddable:
+	@echo '<ca>'
+	@cat $(CA_DIR)/ca.pem
+	@echo -e '</ca>\n\n<cert>'
+	@[ -n "$${CN}" ] || cat $(CA_DIR)/server.pem
+	@[ -z "$${CN}" ] || cat $(CA_DIR)/clients/$${CN}.pem
+	@echo -e '</cert>\n\n<key>'
+	@[ -n "$${CN}" ] || cat $(CA_DIR)/server.pem
+	@[ -z "$${CN}" ] || cat $(CA_DIR)/clients/$${CN}.pem
+	@echo -e '</key>\n\n<tls-auth>'
+	@cat $(CA_DIR)/ta.key
+	@echo -e '</tls-auth>'
+
+config-dhparam: checkcmd-openssl
+	@echo '<dh>'
+	@openssl dhparam -outform PEM 1024 2>/dev/null
+	@echo '</dh>'
 
 
 
@@ -89,6 +107,11 @@ Makefile to manage one or more OpenVPN CAs.
 Available commands:
 - 'make ca-certs': generate the CA and server certificate, and an OpenVPN PSK.
 - 'CN=myClient make client-cert': generate a client certificate for myClient.
+- '[CN=myClient] make config-embeddable': generate the TLS configuration
+  directives for embedding in an OpenVPN client configuration file.
+	If CN is not specified, generate the server directives instead.
+- 'make config-dhparam': generate the DH parameters for embedding in an OpenVPN
+  client/server configuration file.
 
 Available env var parameters:
 - 'CA_DIR=my/CA/dir make ca-certs': change the directory where certificates are
